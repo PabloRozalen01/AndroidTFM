@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "183718729904",
+    "project_id": "oboeapp-8be63",
+    "storage_bucket": "oboeapp-8be63.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183718729904:android:cbc149fc7338ffebf68375",
+        "android_client_info": {
+          "package_name": "com.example.tfm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9C8-EaRl0OabWTabIfOK4mOV84gBhqCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
