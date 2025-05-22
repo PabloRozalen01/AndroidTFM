@@ -10,6 +10,7 @@ import com.example.tfm.auth.*
 import com.example.tfm.ui.theme.*
 
 sealed class Screen(val route: String) {
+    object Welcome    : Screen("welcome")
     object Login      : Screen("login")
     object Register   : Screen("register")
     object Home       : Screen("home")
@@ -26,9 +27,11 @@ fun OboeNavGraph(
     nav: NavHostController = rememberNavController(),
     authVm: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-    val start = if (authVm.currentUser == null) Screen.Login.route else Screen.Home.route
+    NavHost(nav, startDestination = Screen.Welcome.route) {
 
-    NavHost(nav, startDestination = start) {
+        composable(Screen.Welcome.route) {
+            WelcomeScreen(nav, authVm)
+        }
         composable(Screen.Login.route)    { LoginScreen(nav, authVm) }
         composable(Screen.Register.route) { RegisterScreen(nav, authVm) }
         composable(Screen.Home.route)     { HomeScreen(nav) }

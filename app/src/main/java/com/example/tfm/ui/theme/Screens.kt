@@ -8,7 +8,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.tfm.auth.AuthViewModel
 import com.example.tfm.nav.Screen
+
+/* --------- WELCOME --------- */
+@Composable
+fun WelcomeScreen(nav: NavHostController, authVm: AuthViewModel) {
+    Scaffold { p ->
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(p),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(onClick = {
+                if (authVm.currentUser == null)
+                    nav.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                else
+                    nav.navigate(Screen.Home.route) { popUpTo(Screen.Welcome.route) { inclusive = true } }
+            }) {
+                Text("Entrar")
+            }
+        }
+    }
+}
 /* --------- HOME --------- */
 @Composable
 fun HomeScreen(nav: NavHostController) {
