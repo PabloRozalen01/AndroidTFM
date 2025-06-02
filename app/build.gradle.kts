@@ -69,5 +69,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.compose.material:material-icons-extended")
 
 }

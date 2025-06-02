@@ -5,10 +5,14 @@
   "articulación": [
     { "title": "Staccato básico",  "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Reconstruccion_del_Reino.pdf?alt=media&token=2eb41210-8580-4b66-8833-a3e81d20ac14" }
   ],
-  "sonido":     [],
-  "afinación":  [],
-  "dinámicas":  [],
+  "sonido":     [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+  ],
+  "afinación":  [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+  ],
+  "dinámicas":  [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+  ],
   "escalas":    [
-    { "title": "Escala de Do mayor", "file": "scales_C_major.pdf" }
+    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+
   ]
 }

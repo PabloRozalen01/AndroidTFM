@@ -1,5 +1,9 @@
 package com.example.tfm.ui.theme
 
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -48,6 +52,7 @@ import android.os.Environment
 import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,11 +67,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.tfm.ui.theme.routine.PdfRef
+import com.example.tfm.ui.theme.routine.RutinaVm
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+
+
 
 /* --------- WELCOME --------- */
 @Composable
@@ -92,47 +107,45 @@ fun WelcomeScreen(nav: NavHostController, authVm: AuthViewModel) {
     }
 }
 /* --------- HOME --------- */
+@RequiresApi(Build.VERSION_CODES.O)      // por LocalDate
 @Composable
 fun HomeScreen(nav: NavHostController) {
+
+    val ctx = LocalContext.current
+    val routineDone = routineDoneToday(ctx)   // ← comprobar DataStore
+
     Scaffold { p ->
         Box(
             Modifier
                 .fillMaxSize()
                 .padding(p)
         ) {
-            /* 1 · Perfil Arriba-Izquierda */
-            HomeBtn(
-                text = "Perfil",
+            /* 1 · Perfil */
+            HomeBtn("Perfil",
                 onClick = { nav.navigate(Screen.Profile.route) },
-                align = Alignment.TopStart
-            )
+                align = Alignment.TopStart)
 
-            /* 2 · Social Arriba-Derecha */
-            HomeBtn(
-                text = "Social",
+            /* 2 · Social */
+            HomeBtn("Social",
                 onClick = { nav.navigate(Screen.Social.route) },
-                align = Alignment.TopEnd
-            )
+                align = Alignment.TopEnd)
 
-            /* 3 · Metronomo Abajo-Izquierda */
-            HomeBtn(
-                text = "Metrónomo",
+            /* 3 · Metrónomo */
+            HomeBtn("Metrónomo",
                 onClick = { nav.navigate(Screen.Metronome.route) },
-                align = Alignment.BottomStart
-            )
+                align = Alignment.BottomStart)
 
-            /* 4 · Biblioteca Abajo-Derecha */
-            HomeBtn(
-                text = "Biblioteca",
+            /* 4 · Biblioteca */
+            HomeBtn("Biblioteca",
                 onClick = { nav.navigate(Screen.Library.route) },
-                align = Alignment.BottomEnd
-            )
+                align = Alignment.BottomEnd)
 
-            /* 5 · Rutina Centro */
+            /* 5 · Rutina (centro) */
             HomeBtn(
                 text = "Rutina",
                 onClick = { nav.navigate(Screen.Routine.route) },
-                align = Alignment.Center
+                align = Alignment.Center,
+                enabled = !routineDone
             )
         }
     }
@@ -370,6 +383,78 @@ fun ProfileScreen(nav: NavHostController) {
     }
 }
 
+/* ───────── Rutina ───────── */
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun RoutineScreen(nav: NavHostController) {
+    val vm: RutinaVm = viewModel()
+    val ui by vm.state.collectAsState()
+
+    if (ui.finished) {
+        // Pantalla de enhorabuena
+        Scaffold { p ->
+            Column(
+                Modifier.fillMaxSize().padding(p),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("¡Rutina completada!", style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(24.dp))
+                Button(onClick = { nav.navigate(Screen.Home.route) { popUpTo(0) } }) {
+                    Text("Volver a Inicio")
+                }
+            }
+        }
+        return
+    }
+
+    var currentPdf by remember { mutableStateOf<PdfRef?>(null) }
+
+    currentPdf?.let { pdf ->
+        Dialog(onDismissRequest = { currentPdf = null; vm.markDone(ui.progress) }) {
+            Surface {
+                AndroidView(
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            settings.javaScriptEnabled = true
+                            loadUrl(
+                                "https://drive.google.com/viewerng/viewer?embedded=true&url=${Uri.encode(pdf.url)}"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text("Rutina diaria") },
+            navigationIcon = {
+                IconButton(onClick = { nav.navigate(Screen.Home.route) { popUpTo(0) } }) {
+                    Icon(Icons.Default.ArrowBack, "Inicio")
+                }
+            }
+        )
+    }) { p ->
+        Column(
+            Modifier.fillMaxSize().padding(p).padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
+        ) {
+            listOf(0, 1, 2).forEach { idx ->
+                Button(
+                    onClick = { currentPdf = ui.list[idx] },
+                    enabled = idx <= ui.progress,                 // secuencial
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Ejercicio ${idx + 1}") }
+            }
+        }
+    }
+}
+
 @Composable
 private fun RowScope.StatBox(label: String, value: String) {
     Column(
@@ -387,9 +472,11 @@ private fun RowScope.StatBox(label: String, value: String) {
 private fun BoxScope.HomeBtn(
     text: String,
     onClick: () -> Unit,
-    align: Alignment
+    align: Alignment,
+    enabled: Boolean = true
 ) {
     Button(
+        enabled=enabled,
         onClick = onClick,
         modifier = Modifier
             .align(align)
@@ -397,6 +484,24 @@ private fun BoxScope.HomeBtn(
     ) {
         Text(text)
     }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun routineDoneToday(ctx: Context): Boolean {
+    val keyDate     = stringPreferencesKey("date")
+    val keyProgress = intPreferencesKey("progress")
+    val today       = LocalDate.now().toString()
+
+    // collectAsState para recomponerse si cambia
+    val state by ctx.routineDataStore.data
+        .map { prefs ->
+            prefs[keyDate] == today && prefs[keyProgress] == 3
+        }
+        .collectAsState(initial = false)
+
+    return state
 }
 
 /* ─────────────  PLACEHOLDERS  ───────────── */
@@ -408,8 +513,6 @@ fun MetronomeScreen(nav: NavHostController)  = ScreenWithHome("Metrónomo", nav)
 fun TunerScreen(nav: NavHostController)      = ScreenWithHome("Afinador", nav)
 @Composable
 fun SocialScreen(nav: NavHostController)     = ScreenWithHome("Social", nav)
-@Composable
-fun RoutineScreen(nav: NavHostController)    = ScreenWithHome("Rutina diaria", nav)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
