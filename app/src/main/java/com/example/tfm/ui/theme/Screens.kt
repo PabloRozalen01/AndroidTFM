@@ -1,9 +1,7 @@
 package com.example.tfm.ui.theme
 
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,61 +22,38 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import android.Manifest
-import android.app.DownloadManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.tfm.ui.theme.metronome.MetronomeViewModel
 import com.example.tfm.ui.theme.routine.PdfRef
 import com.example.tfm.ui.theme.routine.RutinaVm
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 
@@ -504,13 +479,55 @@ private fun routineDoneToday(ctx: Context): Boolean {
     return state
 }
 
-/* ─────────────  PLACEHOLDERS  ───────────── */
-/* Usa esta plantilla para todas las pantallas secundarias */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MetronomeScreen(nav: NavHostController) {
 
+    val vm: MetronomeViewModel = viewModel()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Metrónomo") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        nav.navigate(Screen.Home.route) { popUpTo(0) }
+                    }) { Icon(Icons.Default.ArrowBack, "Inicio") }
+                }
+            )
+        }
+    ) { p ->
+        MetronomePane(vm, Modifier.padding(p))
+    }
+}
+
+/* ---------- UI del metrónomo ---------- */
 @Composable
-fun MetronomeScreen(nav: NavHostController)  = ScreenWithHome("Metrónomo", nav)
-@Composable
-fun TunerScreen(nav: NavHostController)      = ScreenWithHome("Afinador", nav)
+fun MetronomePane(
+    vm: MetronomeViewModel,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = vm::dec) { Icon(Icons.Default.Remove, null) }
+            Text("${vm.bpm}", style = MaterialTheme.typography.displayLarge)
+            IconButton(onClick = vm::inc) { Icon(Icons.Default.Add, null) }
+        }
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = vm::toggle) {
+            Text(if (vm.isRunning) "Parar" else "Iniciar")
+        }
+    }
+}
+
+
+
+
+
 @Composable
 fun SocialScreen(nav: NavHostController)     = ScreenWithHome("Social", nav)
 
