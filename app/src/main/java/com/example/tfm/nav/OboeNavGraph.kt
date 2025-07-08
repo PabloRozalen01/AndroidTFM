@@ -32,7 +32,7 @@ fun OboeNavGraph(
     NavHost(nav, startDestination = Screen.Welcome.route) {
 
         composable(Screen.Welcome.route) {
-            WelcomeScreen(nav, authVm)
+            WelcomeScreen(nav)
         }
         composable(Screen.Login.route)    { LoginScreen(nav, authVm) }
         composable(Screen.Register.route) { RegisterScreen(nav, authVm) }

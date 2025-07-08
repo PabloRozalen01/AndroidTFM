@@ -12,6 +12,8 @@ import androidx.compose.ui.layout.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.tfm.auth.AuthViewModel
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import com.example.tfm.nav.Screen
 import android.app.Application
 import androidx.lifecycle.ViewModel
@@ -43,39 +45,55 @@ import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.tfm.ui.theme.metronome.MetronomeViewModel
 import com.example.tfm.ui.theme.routine.PdfRef
 import com.example.tfm.ui.theme.routine.RutinaVm
+import com.example.tfm.ui.theme.social.Friend
+import com.example.tfm.ui.theme.social.SocialVm
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
-
+import com.example.tfm.R
+import kotlinx.coroutines.delay
 
 
 /* --------- WELCOME --------- */
 @Composable
-fun WelcomeScreen(nav: NavHostController, authVm: AuthViewModel) {
+fun WelcomeScreen(nav: NavHostController) {
+
     Scaffold { p ->
-        Box(
-            Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(p),
-            contentAlignment = Alignment.Center
+                .padding(p)
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = {
-                if (authVm.currentUser == null)
-                    nav.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
-                    }
-                else
-                    nav.navigate(Screen.Home.route) { popUpTo(Screen.Welcome.route) { inclusive = true } }
-            }) {
+            /* --- logo nuevo --- */
+            Image(
+                painter = painterResource(id = R.drawable.logo_oboeapp_text),
+                contentDescription = "Logo OboeApp",
+                modifier = Modifier
+                    .height(250.dp)              // ajusta a tu gusto
+                    .padding(bottom = 48.dp)
+            )
+
+            /* Botón entrar / login */
+            Button(
+                onClick = { nav.navigate(Screen.Login.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Entrar")
             }
         }
@@ -528,8 +546,153 @@ fun MetronomePane(
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SocialScreen(nav: NavHostController)     = ScreenWithHome("Social", nav)
+fun SocialScreen(nav: NavHostController) {
+
+    /* ---------- estado ---------- */
+    val vm: SocialVm = viewModel()
+    val list by vm.friends.collectAsState()
+
+    val myUid = FirebaseAuth.getInstance().currentUser?.uid ?: "—"
+    val clipboard = LocalClipboardManager.current
+    var copied by remember { mutableStateOf(false) }
+
+    var uidToAdd by remember { mutableStateOf("") }
+    var adding   by remember { mutableStateOf(false) }
+
+    /* ---------- UI ---------- */
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Social") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { nav.navigate(Screen.Home.route) { popUpTo(0) } }
+                    ) { Icon(Icons.Default.ArrowBack, contentDescription = "Inicio") }
+                }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = { Text("Añadir amigo") },
+                icon = { Icon(Icons.Default.PersonAdd, null) },
+                onClick = { adding = true }
+            )
+        }
+    ) { padding ->
+
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+
+            /* ---- tarjeta con mi UID ---- */
+            Card(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Row(
+                    Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Tu UID", style = MaterialTheme.typography.labelMedium)
+                        Text(myUid, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    IconButton(onClick = {
+                        clipboard.setText(AnnotatedString(myUid))
+                        copied = true
+                    }) { Icon(Icons.Default.ContentCopy, "Copiar UID") }
+                }
+            }
+
+            if (copied) {
+                LaunchedEffect(Unit) {
+                    delay(1500)
+                    copied = false
+                }
+                Text(
+                    "UID copiado",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                )
+            }
+
+            /* ---- título de la lista ---- */
+            Text(
+                "Amigos",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            /* ---- lista de amigos ---- */
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(list, key = { it.uid }) { friend -> FriendRow(friend) }
+            }
+        }
+
+        /* ---- diálogo añadir amigo ---- */
+        if (adding) {
+            AlertDialog(
+                onDismissRequest = { adding = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        vm.addFriendByUid(uidToAdd.trim()) { adding = false; uidToAdd = "" }
+                    }) { Text("Añadir") }
+                },
+                dismissButton = { TextButton(onClick = { adding = false }) { Text("Cancelar") } },
+                title = { Text("UID del amigo") },
+                text  = {
+                    OutlinedTextField(
+                        value = uidToAdd,
+                        onValueChange = { uidToAdd = it },
+                        singleLine = true,
+                        label = { Text("UID") }
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun FriendRow(f: Friend) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(     // coil-compose
+                model = f.photo ?: R.drawable.ic_user_placeholder,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp).clip(CircleShape)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(f.name, style = MaterialTheme.typography.titleMedium)
+                Text("${f.streak} días de racha", style = MaterialTheme.typography.bodySmall)
+            }
+            Text("${f.points} pts", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
