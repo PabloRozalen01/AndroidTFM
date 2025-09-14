@@ -1,18 +1,23 @@
 {
   "calentamiento": [
-    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+    { "title": "Calentamiento 1", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FCalentamiento%201.pdf?alt=media&token=a904abbb-3667-4cfb-9da5-56678219401f" },
+    { "title": "Calentamiento 2", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FCalentamiento%202.pdf?alt=media&token=952c439d-4d8d-4697-9981-ca98c5e1e13d" }
   ],
   "articulación": [
-    { "title": "Staccato básico",  "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Reconstruccion_del_Reino.pdf?alt=media&token=2eb41210-8580-4b66-8833-a3e81d20ac14" }
+    { "title": "Staccato",  "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FStacatto.pdf?alt=media&token=3a66fad8-9181-42cb-bc3d-67f495398f4e" },
+    { "title": "Picado-Ligado",  "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FPicado-Ligado.pdf?alt=media&token=71d46220-0186-42e7-9d7e-059712e6684d" }
   ],
-  "sonido":     [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+  "afinación":  [
+    { "title": "Afinación sobreagudas", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FAfinación%20sobreagudas.pdf?alt=media&token=34e9c194-a0f1-4821-a1af-6699421251d8" }
   ],
-  "afinación":  [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
-  ],
-  "dinámicas":  [    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
+  "dinámicas":  [
+    { "title": "Dinámicas ritmos", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FDinámicas.pdf?alt=media&token=dbe5f19c-33ac-4996-82d5-d4ab3ad24666" }
   ],
   "escalas":    [
-    { "title": "Long tones en Fa", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/Legacy.pdf?alt=media&token=58fc6b0e-9de4-4117-b578-07d0569954a2" }
-
+    { "title": "Re mayor desarrollada", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FRe%20mayor%20desarrollada.pdf?alt=media&token=7a86eaf3-fd6a-4f7b-abc6-20372fe1619d" },
+    { "title": "Re menor lenta", "file": "https://firebasestorage.googleapis.com/v0/b/oboeapp-8be63.firebasestorage.app/o/biblioteca%2FRe%20menor%20lenta.pdf?alt=media&token=79260eac-be7c-4447-be3d-b1fc9c048ef2" }
   ]
 }
+
+
+

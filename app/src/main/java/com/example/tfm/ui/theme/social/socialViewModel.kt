@@ -28,7 +28,6 @@ class SocialVm : ViewModel() {
 
     init { listenFriendsUidList() }
 
-    /** Escucha mi documento y carga los UID de mis amigos */
     private fun listenFriendsUidList() {
         val uid = auth.currentUser?.uid ?: return
         db.collection("users").document(uid)
@@ -40,7 +39,6 @@ class SocialVm : ViewModel() {
             }
     }
 
-    /** Descarga los datos de cada amigo (nombre, foto, puntos, racha) */
     private fun fetchFriendsData(ids: List<String>) {
         if (ids.isEmpty()) { _friends.value = emptyList(); return }
 
@@ -60,10 +58,9 @@ class SocialVm : ViewModel() {
                             streak = doc.getLong("streak")?.toInt() ?: 0
                         )
                     }
-                    synchronized(tmpList) {          // varios callbacks
+                    synchronized(tmpList) {
                         tmpList += list
                         if (tmpList.size >= ids.size) {
-                            // todos los chunks respondieron
                             _friends.value = tmpList.sortedBy { it.name.lowercase() }
                         }
                     }
@@ -71,7 +68,6 @@ class SocialVm : ViewModel() {
         }
     }
 
-    /** Añadir amigo por UID */
     fun addFriendByUid(friendUid: String, onResult: (Boolean) -> Unit) {
         val myUid = auth.currentUser?.uid ?: return
         viewModelScope.launch {

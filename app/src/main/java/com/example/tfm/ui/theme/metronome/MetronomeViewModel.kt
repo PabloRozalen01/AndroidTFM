@@ -23,11 +23,10 @@ class MetronomeViewModel : ViewModel() {
     private val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
     private var job: Job? = null
 
-    /* Aumentar / disminuir */
+
     fun inc() { bpm = (bpm + 1).coerceIn(30, 240) }
     fun dec() { bpm = (bpm - 1).coerceIn(30, 240) }
 
-    /* Play/Stop */
     fun toggle() = if (isRunning) stop() else start()
 
     private fun start() {

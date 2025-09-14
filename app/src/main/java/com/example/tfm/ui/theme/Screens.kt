@@ -8,10 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.tfm.auth.AuthViewModel
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.example.tfm.nav.Screen
@@ -80,16 +78,14 @@ fun WelcomeScreen(nav: NavHostController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            /* --- logo nuevo --- */
             Image(
                 painter = painterResource(id = R.drawable.logo_oboeapp_text),
                 contentDescription = "Logo OboeApp",
                 modifier = Modifier
-                    .height(250.dp)              // ajusta a tu gusto
+                    .height(250.dp)
                     .padding(bottom = 48.dp)
             )
 
-            /* Botón entrar / login */
             Button(
                 onClick = { nav.navigate(Screen.Login.route) },
                 modifier = Modifier.fillMaxWidth()
@@ -100,12 +96,12 @@ fun WelcomeScreen(nav: NavHostController) {
     }
 }
 /* --------- HOME --------- */
-@RequiresApi(Build.VERSION_CODES.O)      // por LocalDate
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(nav: NavHostController) {
 
     val ctx = LocalContext.current
-    val routineDone = routineDoneToday(ctx)   // ← comprobar DataStore
+    val routineDone = routineDoneToday(ctx)
 
     Scaffold { p ->
         Box(
@@ -149,8 +145,8 @@ fun HomeScreen(nav: NavHostController) {
 
 data class PdfItem(val title: String, val file: String)
 
-class BibliotecaVm(application: Application) : AndroidViewModel(application) { // <-- público
-    var data: Map<String, List<PdfItem>>          //  ⬅️ tipo bien explícito
+class BibliotecaVm(application: Application) : AndroidViewModel(application) {
+    var data: Map<String, List<PdfItem>>
             by mutableStateOf(emptyMap())
         private set
 
@@ -161,10 +157,9 @@ class BibliotecaVm(application: Application) : AndroidViewModel(application) { /
                     .bufferedReader()
                     .readText()
             }
-            // type seguro para Map<String, List<PdfItem>>
+
             val type = object : TypeToken<Map<String, List<PdfItem>>>() {}.type
 
-            // parseo y asignación
             data = Gson().fromJson(json, type)
         }
     }
@@ -176,9 +171,6 @@ fun LibraryScreen(nav: NavHostController) {
 
     val vm: BibliotecaVm = viewModel()
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    /* permiso de notificaciones (Android 13+) */
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {}
@@ -199,7 +191,6 @@ fun LibraryScreen(nav: NavHostController) {
                     factory = {
                         WebView(it).apply {
                             settings.javaScriptEnabled = true
-                            // Google Docs viewer
                             loadUrl(
                                 "https://drive.google.com/viewerng/viewer?embedded=true&url=${Uri.encode(url)}"
                             )
@@ -276,17 +267,15 @@ class ProfileVm : ViewModel() {
         val user = auth.currentUser
 
         if (user == null) {
-            // no hay sesión → quedamos en loading = false
             _state.value = _state.value.copy(loading = false)
         } else {
-            // datos básicos que ya vienen de FirebaseAuth
             _state.value = _state.value.copy(
                 displayName = user.displayName ?: user.email ?: "",
                 email       = user.email ?: "",
                 photoUrl    = user.photoUrl?.toString()
             )
 
-            // puntos y racha desde Firestore
+
             viewModelScope.launch {
                 db.collection("users").document(user.uid).get()
                     .addOnSuccessListener { doc ->
@@ -306,8 +295,6 @@ class ProfileVm : ViewModel() {
             }
         }
     }
-
-
     fun logout() = auth.signOut()
 }
 
@@ -341,9 +328,8 @@ fun ProfileScreen(nav: NavHostController) {
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Foto (si la hay)
                 ui.photoUrl?.let {
-                    AsyncImage(                     // coil-compose
+                    AsyncImage(
                         model = it,
                         contentDescription = null,
                         modifier = Modifier.size(96.dp).clip(CircleShape)
@@ -385,7 +371,6 @@ fun RoutineScreen(nav: NavHostController) {
     val ui by vm.state.collectAsState()
 
     if (ui.finished) {
-        // Pantalla de enhorabuena
         Scaffold { p ->
             Column(
                 Modifier.fillMaxSize().padding(p),
@@ -440,7 +425,7 @@ fun RoutineScreen(nav: NavHostController) {
             listOf(0, 1, 2).forEach { idx ->
                 Button(
                     onClick = { currentPdf = ui.list[idx] },
-                    enabled = idx <= ui.progress,                 // secuencial
+                    enabled = idx <= ui.progress,
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Ejercicio ${idx + 1}") }
             }
@@ -588,7 +573,6 @@ fun SocialScreen(nav: NavHostController) {
                 .padding(padding)
         ) {
 
-            /* ---- tarjeta con mi UID ---- */
             Card(
                 Modifier
                     .fillMaxWidth()
@@ -625,7 +609,6 @@ fun SocialScreen(nav: NavHostController) {
                 )
             }
 
-            /* ---- título de la lista ---- */
             Text(
                 "Amigos",
                 style = MaterialTheme.typography.titleMedium,
@@ -633,7 +616,6 @@ fun SocialScreen(nav: NavHostController) {
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            /* ---- lista de amigos ---- */
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
@@ -642,7 +624,7 @@ fun SocialScreen(nav: NavHostController) {
             }
         }
 
-        /* ---- diálogo añadir amigo ---- */
+
         if (adding) {
             AlertDialog(
                 onDismissRequest = { adding = false },
@@ -690,30 +672,5 @@ private fun FriendRow(f: Friend) {
             }
             Text("${f.points} pts", style = MaterialTheme.typography.bodyMedium)
         }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ScreenWithHome(title: String, nav: NavHostController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        nav.navigate(Screen.Home.route) { popUpTo(0) }
-                    }) { Text("Inicio") }
-                }
-            )
-        }
-    ) { p ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(p),
-            contentAlignment = Alignment.Center
-        ) { Text("Pantalla $title") }
     }
 }

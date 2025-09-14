@@ -31,15 +31,14 @@ class RutinaVm(app: Application) : AndroidViewModel(app) {
     val state: StateFlow<RoutineState> = _state
 
     private val keyDate         = stringPreferencesKey("date")
-    private val keyExercises    = stringPreferencesKey("exercises") // JSON array
-    private val keyProgress     = intPreferencesKey("progress")     // 0..3
+    private val keyExercises    = stringPreferencesKey("exercises")
+    private val keyProgress     = intPreferencesKey("progress")
 
-    init {                                         // se llama una vez al día
+    init {
         viewModelScope.launch {
             store.data.first().let { prefs ->
                 val today = LocalDate.now().toString()
                 if (prefs[keyDate] == today) {
-                    // rutina ya generada hoy
                     _state.value = RoutineState(
                         list = Gson().fromJson(
                             prefs[keyExercises] ?: "[]",
@@ -49,7 +48,6 @@ class RutinaVm(app: Application) : AndroidViewModel(app) {
                         finished = (prefs[keyProgress] ?: 0) == 3
                     )
                 } else {
-                    // generar nueva
                     generateNewRoutine(today)
                 }
             }
@@ -57,20 +55,19 @@ class RutinaVm(app: Application) : AndroidViewModel(app) {
     }
 
     private suspend fun generateNewRoutine(today: String) {
-        // 1· leer biblioteca.json
+
         val json = getApplication<Application>().assets
             .open("biblioteca.json").bufferedReader().readText()
         val map: Map<String, List<PdfItem>> =
             Gson().fromJson(json, object : TypeToken<Map<String, List<PdfItem>>>() {}.type)
 
-        // 2· elegir 3 categorías distintas
+
         val categories = map.keys.shuffled().take(3)
         val routine = categories.map { cat ->
             val item = map[cat]!!.random()
             PdfRef(cat, item.title, item.file)
         }
 
-        // 3· guardar en DataStore
         store.edit { prefs ->
             prefs[keyDate]      = today
             prefs[keyExercises] = Gson().toJson(routine)
@@ -90,8 +87,7 @@ class RutinaVm(app: Application) : AndroidViewModel(app) {
     private fun finishRoutine() {
         _state.value = _state.value.copy(finished = true)
         viewModelScope.launch {
-            store.edit { }                    // progress ya = 3
-            // actualizar puntos/racha
+            store.edit { }
             val uid = auth.currentUser?.uid ?: return@launch
             db.collection("users")
                 .document(uid)
@@ -109,6 +105,6 @@ class RutinaVm(app: Application) : AndroidViewModel(app) {
 data class PdfRef(val category: String, val title: String, val url: String)
 data class RoutineState(
     val list: List<PdfRef> = emptyList(),
-    val progress: Int = 0,            // 0: ninguno, 1: ejercicio1 hecho…
+    val progress: Int = 0,
     val finished: Boolean = false
 )
